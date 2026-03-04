@@ -161,18 +161,10 @@ tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match
 
 with tab1:
     st.subheader("Leaderboard")
-    
-    # 1. Check if the player list is empty
-    if len(st.session_state.players) == 0:
-        st.info("👋 No players have been added yet! Go to the **Tournament Setup** tab in the sidebar to register your players.")
-        
-    else:
-        # 2. Only if players exist, calculate standings
-        standings_df = get_standings()
-        
-        # 3. Check if any matches have been recorded to avoid a "0 points" table if preferred
-        # If you want to show the list of names with 0 points immediately, keep this. 
-        # If you want to hide the table until Round 1 ends, add another 'if st.session_state.matches:' check.
+    standings_df = get_standings()
+
+    # This checks if the DataFrame has any actual data rows
+    if not standings_df.empty:
         st.dataframe(
             standings_df, 
             use_container_width=True, 
@@ -183,7 +175,7 @@ with tab1:
             }
         )
         
-        # 4. Only show the download button if there's actually a round in progress/done
+        # Only show export if the tournament has actually started
         if st.session_state.current_round > 0:
             csv = standings_df.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -192,6 +184,9 @@ with tab1:
                 file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
                 mime='text/csv',
             )
+    else:
+        # This will show if there are no players OR if no rounds have been played yet
+        st.info("👋 Add players in the sidebar and start Round 1 to see the leaderboard!")
 
 with tab2:
     if not st.session_state.pairings:
@@ -317,6 +312,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
