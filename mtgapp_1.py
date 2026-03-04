@@ -120,7 +120,7 @@ def add_player_callback():
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.header("Admin Controls")
+    st.header("🔮 MTG Tournament")
     if st.session_state.current_round == 0:
         st.subheader("Registration")
         # Adding 'on_change' and 'key' makes hitting Enter work instantly
@@ -144,10 +144,17 @@ with st.sidebar:
     else:
         st.info(f"Tournament in Progress: Round {st.session_state.current_round}")
 
-    st.divider()
-    if st.button("Reset Tournament", type="primary"):
-        st.session_state.clear()
-        st.rerun()
+        st.divider()
+        st.write(f"**Total Players:** {len(st.session_state.players)}")
+        if st.session_state.players:
+            with st.expander("View/Remove Players"):
+                for p in st.session_state.players:
+                    cols = st.columns([4, 1])
+                    cols[0].write(p)
+                    if cols[1].button("❌", key=f"del_{p}"):
+                        st.session_state.players.remove(p)
+                        st.rerun()
+
 
 # --- MAIN UI ---
 tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
@@ -301,6 +308,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
