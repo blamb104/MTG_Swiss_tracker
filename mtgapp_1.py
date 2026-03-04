@@ -299,9 +299,10 @@ with tab3:
         for idx, match in enumerate(st.session_state.matches):
             c = st.columns([1, 4, 1])
             c[0].write(f"**Rd {match['round']}**")
-            c[1].write(f"{match['p1']} ({match['p1_w']}) vs ({match['p2']}) {match['p2_w']} - Draws: {match['d']}")
+            c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
