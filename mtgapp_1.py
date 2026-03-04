@@ -129,6 +129,7 @@ with st.sidebar:
             key="player_input", 
             on_change=add_player_callback,
             placeholder="Type name and hit Enter..."
+            autocomplete="new-password"
         )
         
         st.write(f"**Total Players:** {len(st.session_state.players)}")
@@ -284,3 +285,4 @@ with tab3:
             if c[2].button("Edit", key=f"edit_{idx}"):
 
                 edit_match_dialog(idx)
+
