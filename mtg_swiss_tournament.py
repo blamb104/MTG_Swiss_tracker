@@ -45,7 +45,9 @@ def edit_match_dialog(index):
 
 # --- STANDINGS & SWISS PAIRING LOGIC ---
 def get_standings():
-    if not st.session_state.players:
+    # If no players OR no matches have been played yet
+    if not st.session_state.players or not st.session_state.matches:
+        # Returning this ensures .empty is True
         return pd.DataFrame(columns=['Player', 'Points', 'OMWP', 'GWP'])
     
     player_stats = {}
@@ -160,11 +162,11 @@ st.title("🔮 MTG Swiss Tournament")
 tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
 
 with tab1:
-    st.header("📊 Standings") # Using your preferred header
+    st.header("🏆 Leaderboard")
     df = get_standings()
     
-    # This will be True if there are 0 rows, even if there are column headers
-    if not df.empty:
+    # Check if df exists AND has at least one row of actual data
+    if not df.empty and len(df) > 0:
         st.dataframe(
             df, 
             use_container_width=True, 
@@ -175,17 +177,17 @@ with tab1:
             }
         )
         
-        # --- EXPORT TO CSV ---
+        # EXPORT SECTION
         csv = df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Export Standings to CSV",
             data=csv,
-            file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
+            file_name=f"Tournament_Standings.csv",
             mime='text/csv',
         )
     else:
-        # This shows if get_standings() returned 0 rows
-        st.info("👋 Add players and finalize Round 1 to see the leaderboard!")
+        # This will ONLY show if the table is truly empty
+        st.info("👋 Welcome! Add players in the sidebar and finalize Round 1 to start the leaderboard.")
 
 with tab2:
     if not st.session_state.pairings:
@@ -311,6 +313,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
