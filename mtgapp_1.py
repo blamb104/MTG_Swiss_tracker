@@ -50,45 +50,64 @@ def get_standings():
     
     player_stats = {}
     
-    # 1. Calculate Individual MWP and GWP
+    # 1. Calculate Individual Match-Win % (MWP) and Game-Win % (GWP)
     for p in st.session_state.players:
+        # Find all matches this player has participated in
         p_matches = [m for m in st.session_state.matches if m['p1'] == p or m['p2'] == p]
         m_pts, g_pts, total_games = 0, 0, 0
         rounds_played = len(p_matches)
         
         for m in p_matches:
             is_p1 = (m['p1'] == p)
+            opp = m['p2'] if is_p1 else m['p1']
             w, l, d = (m['p1_w'], m['p2_w'], m['d']) if is_p1 else (m['p2_w'], m['p1_w'], m['d'])
             
-            if w > l: m_pts += 3
-            elif w == l and (w > 0 or d > 0): m_pts += 1
+            # --- MATCH POINTS ---
+            # Win = 3, Draw = 1, Loss = 0 (Includes BYE wins)
+            if w > l: 
+                m_pts += 3
+            elif w == l and (w > 0 or d > 0): 
+                m_pts += 1
             
-            if m['p1'] != "BYE" and m['p2'] != "BYE":
+            # --- GAME WIN PERCENTAGE (GWP) ---
+            # Per MTR: BYEs are ignored for GWP. Only count games against real opponents.
+            if opp != "BYE":
                 g_pts += (w * 3) + d
                 total_games += (w + l + d)
-            else:
-                g_pts += 6
-                total_games += 2
 
+        # Calculate MWP (Minimum 0.33 per MTR rules)
         mwp = max(0.33, m_pts / (rounds_played * 3)) if rounds_played > 0 else 0.33
+        
+        # Calculate GWP (Minimum 0.33 per MTR rules)
+        # Only calculated based on non-BYE games
         gwp = max(0.33, g_pts / (total_games * 3)) if total_games > 0 else 0.33
+        
+        # Store for OMWP calculation in step 2
         opps = [m['p2'] if m['p1'] == p else m['p1'] for m in p_matches]
         player_stats[p] = {'points': m_pts, 'mwp': mwp, 'gwp': gwp, 'opponents': opps}
 
-    # 2. Calculate OMWP and build the list
-    final_list = [] # This might have been named differently in your code
+    # 2. Calculate Opponent Match-Win % (OMWP) and build the final list
+    final_list = []
     for p, stats in player_stats.items():
+        # Get the MWP of every opponent (excluding BYEs)
         opp_mwps = [player_stats[o]['mwp'] for o in stats['opponents'] if o != "BYE" and o in player_stats]
+        
+        # OMWP is the average of those MWPs
         omwp = sum(opp_mwps) / len(opp_mwps) if opp_mwps else 0.33
         
+        # We return pure numbers (multiplied by 100) for numerical sorting
         final_list.append({
             'Player': p,
             'Points': stats['points'],
-            'OMWP': max(0.33, omwp) * 100, 
+            'OMWP': max(0.33, omwp) * 100,
             'GWP': stats['gwp'] * 100
         })
     
-    return pd.DataFrame(final_list).sort_values(by=['Points', 'OMWP', 'GWP'], ascending=False)
+    # Sort by Points (Primary), then OMWP (1st Tiebreaker), then GWP (2nd Tiebreaker)
+    return pd.DataFrame(final_list).sort_values(
+        by=['Points', 'OMWP', 'GWP'], 
+        ascending=False
+    )
 
 # --- CALLBACK FOR RAPID ENTRY ---
 def add_player_callback():
@@ -263,4 +282,5 @@ with tab3:
             c[0].write(f"**Rd {match['round']}**")
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs ({match['p2_w']}) {match['p2']} - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
+
                 edit_match_dialog(idx)
