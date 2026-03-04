@@ -128,7 +128,7 @@ with st.sidebar:
             "Enter Player Name:", 
             key="player_input", 
             on_change=add_player_callback,
-            placeholder="Type name and hit Enter..."
+            placeholder="Type name and hit Enter...",
             autocomplete="new-password"
         )
         
@@ -285,4 +285,5 @@ with tab3:
             if c[2].button("Edit", key=f"edit_{idx}"):
 
                 edit_match_dialog(idx)
+
 
