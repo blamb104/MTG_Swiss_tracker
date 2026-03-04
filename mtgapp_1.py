@@ -278,12 +278,30 @@ with tab3:
     if not st.session_state.matches:
         st.write("No matches played yet.")
     else:
+        # --- NEW: EXPORT HISTORY TO CSV ---
+        history_df = pd.DataFrame(st.session_state.matches)
+        
+        # Reordering columns for better readability in the CSV
+        history_df = history_df[['round', 'p1', 'p1_w', 'p2_w', 'p2', 'd']]
+        
+        csv_history = history_df.to_csv(index=False).encode('utf-8')
+        
+        st.download_button(
+            label="📥 Export Match History to CSV",
+            data=csv_history,
+            file_name=f"Tournament_History_Rd{st.session_state.current_round}.csv",
+            mime='text/csv',
+        )
+        
+        st.divider()
+        # --- END EXPORT SECTION ---
+
         for idx, match in enumerate(st.session_state.matches):
             c = st.columns([1, 4, 1])
             c[0].write(f"**Rd {match['round']}**")
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs ({match['p2_w']}) {match['p2']} - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
-
                 edit_match_dialog(idx)
+
 
 
