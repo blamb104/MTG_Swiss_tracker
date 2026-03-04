@@ -166,7 +166,7 @@ with tab1:
 
     # 1. DIRECT CHECK: Has any match actually been completed?
     if not st.session_state.matches:
-        st.info("👋 Add players in the sidebar and finalize Round 1 to start the leaderboard!")
+        st.info("Add players in the sidebar. The leaderboard will be displayed after you finalize Round 1.")
     
     else:
         # 2. If matches exist, generate and show the table
@@ -196,7 +196,7 @@ with tab1:
 with tab2:
     if not st.session_state.pairings:
         # Determine the correct button label
-        label = "Start Tournament (Random Pairings)" if st.session_state.current_round == 0 else f"Generate Round {st.session_state.current_round + 1}"
+        label = "Start Tournament" if st.session_state.current_round == 0 else f"Generate Round {st.session_state.current_round + 1}"
         
         if st.button(label):
             # 1. Prepare candidates
@@ -317,6 +317,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
