@@ -120,7 +120,7 @@ def add_player_callback():
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.header("🔮 MTG Tournament")
+    st.header("Tournament Overview")
     if st.session_state.current_round == 0:
         st.subheader("Registration")
         # Adding 'on_change' and 'key' makes hitting Enter work instantly
@@ -157,6 +157,7 @@ with st.sidebar:
 
 
 # --- MAIN UI ---
+st.title("🔮 MTG Swiss Tournament")
 tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
 
 with tab1:
@@ -308,6 +309,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
