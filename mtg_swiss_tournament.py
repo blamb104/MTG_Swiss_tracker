@@ -155,7 +155,6 @@ with st.sidebar:
                         st.session_state.players.remove(p)
                         st.rerun()
 
-
 # --- MAIN UI ---
 st.title("🔮 MTG Swiss Tournament")
 tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
@@ -163,13 +162,17 @@ tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match
 with tab1:
     st.subheader("Leaderboard")
     
-    if not st.session_state.players:
-        # This message appears if the registration list is empty
-        st.info("💡 No players registered yet. Please add players in the **Tournament Setup** sidebar to begin!")
+    # 1. Check if the player list is empty
+    if len(st.session_state.players) == 0:
+        st.info("👋 No players have been added yet! Go to the **Tournament Setup** tab in the sidebar to register your players.")
+        
     else:
+        # 2. Only if players exist, calculate standings
         standings_df = get_standings()
         
-        # Display the table
+        # 3. Check if any matches have been recorded to avoid a "0 points" table if preferred
+        # If you want to show the list of names with 0 points immediately, keep this. 
+        # If you want to hide the table until Round 1 ends, add another 'if st.session_state.matches:' check.
         st.dataframe(
             standings_df, 
             use_container_width=True, 
@@ -180,10 +183,8 @@ with tab1:
             }
         )
         
-        # Only show the download button if there is actually data (at least 1 round played)
-        if not st.session_state.matches:
-            st.caption("Match data will appear here after Round 1 is finalized.")
-        else:
+        # 4. Only show the download button if there's actually a round in progress/done
+        if st.session_state.current_round > 0:
             csv = standings_df.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Export Standings to CSV",
@@ -316,6 +317,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
