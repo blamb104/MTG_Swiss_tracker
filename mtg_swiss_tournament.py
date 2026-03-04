@@ -163,31 +163,35 @@ tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match
 
 with tab1:
     st.header("🏆 Leaderboard")
-    df = get_standings()
+
+    # 1. DIRECT CHECK: Has any match actually been completed?
+    if not st.session_state.matches:
+        st.info("👋 Add players in the sidebar and finalize Round 1 to start the leaderboard!")
     
-    # Check if df exists AND has at least one row of actual data
-    if not df.empty and len(df) > 0:
-        st.dataframe(
-            df, 
-            use_container_width=True, 
-            hide_index=True,
-            column_config={
-                "OMWP": st.column_config.NumberColumn("OMWP", format="%.5g%%"),
-                "GWP": st.column_config.NumberColumn("GWP", format="%.5g%%")
-            }
-        )
-        
-        # EXPORT SECTION
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Export Standings to CSV",
-            data=csv,
-            file_name=f"Tournament_Standings.csv",
-            mime='text/csv',
-        )
     else:
-        # This will ONLY show if the table is truly empty
-        st.info("👋 Welcome! Add players in the sidebar and finalize Round 1 to start the leaderboard.")
+        # 2. If matches exist, generate and show the table
+        df = get_standings()
+        
+        # Double check that df isn't None or broken
+        if df is not None:
+            st.dataframe(
+                df, 
+                use_container_width=True, 
+                hide_index=True,
+                column_config={
+                    "OMWP": st.column_config.NumberColumn("OMWP", format="%.5g%%"),
+                    "GWP": st.column_config.NumberColumn("GWP", format="%.5g%%")
+                }
+            )
+            
+            # --- EXPORT TO CSV ---
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Export Standings to CSV",
+                data=csv,
+                file_name=f"Tournament_Standings_Rd{st.session_state.current_round}.csv",
+                mime='text/csv',
+            )
 
 with tab2:
     if not st.session_state.pairings:
@@ -313,6 +317,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
