@@ -120,7 +120,7 @@ def add_player_callback():
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.header("Tournament Overview")
+    st.header("Tournament Setup/Overview")
     if st.session_state.current_round == 0:
         st.subheader("Registration")
         # Adding 'on_change' and 'key' makes hitting Enter work instantly
@@ -309,6 +309,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
