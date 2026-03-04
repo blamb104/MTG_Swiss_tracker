@@ -162,28 +162,35 @@ tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match
 
 with tab1:
     st.subheader("Leaderboard")
-    standings_df = get_standings()
     
-    st.dataframe(
-        standings_df, 
-        use_container_width=True, 
-        hide_index=True,
-        column_config={
-            # "g" format means "General": it drops trailing zeros automatically
-            # ".5" limits it to 5 significant figures/decimals
-            "OMWP": st.column_config.NumberColumn("OMWP", format="%.5g%%"),
-            "GWP": st.column_config.NumberColumn("GWP", format="%.5g%%")
-        }
-    )
-    
-    # Download Button
-    csv = standings_df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="📥 Export Standings to CSV",
-        data=csv,
-        file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
-        mime='text/csv',
-    )
+    if not st.session_state.players:
+        # This message appears if the registration list is empty
+        st.info("💡 No players registered yet. Please add players in the **Tournament Setup** sidebar to begin!")
+    else:
+        standings_df = get_standings()
+        
+        # Display the table
+        st.dataframe(
+            standings_df, 
+            use_container_width=True, 
+            hide_index=True,
+            column_config={
+                "OMWP": st.column_config.NumberColumn("OMWP", format="%.5g%%"),
+                "GWP": st.column_config.NumberColumn("GWP", format="%.5g%%")
+            }
+        )
+        
+        # Only show the download button if there is actually data (at least 1 round played)
+        if not st.session_state.matches:
+            st.caption("Match data will appear here after Round 1 is finalized.")
+        else:
+            csv = standings_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Export Standings to CSV",
+                data=csv,
+                file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
+                mime='text/csv',
+            )
 
 with tab2:
     if not st.session_state.pairings:
@@ -309,6 +316,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
