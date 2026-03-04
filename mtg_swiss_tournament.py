@@ -160,13 +160,13 @@ st.title("🔮 MTG Swiss Tournament")
 tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
 
 with tab1:
-    st.subheader("Leaderboard")
-    standings_df = get_standings()
-
-    # This checks if the DataFrame has any actual data rows
-    if not standings_df.empty:
+    st.header("📊 Standings") # Using your preferred header
+    df = get_standings()
+    
+    # This will be True if there are 0 rows, even if there are column headers
+    if not df.empty:
         st.dataframe(
-            standings_df, 
+            df, 
             use_container_width=True, 
             hide_index=True,
             column_config={
@@ -175,18 +175,17 @@ with tab1:
             }
         )
         
-        # Only show export if the tournament has actually started
-        if st.session_state.current_round > 0:
-            csv = standings_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Export Standings to CSV",
-                data=csv,
-                file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
-                mime='text/csv',
-            )
+        # --- EXPORT TO CSV ---
+        csv = df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Export Standings to CSV",
+            data=csv,
+            file_name=f"Tournament_Results_Rd{st.session_state.current_round}.csv",
+            mime='text/csv',
+        )
     else:
-        # This will show if there are no players OR if no rounds have been played yet
-        st.info("👋 Add players in the sidebar and start Round 1 to see the leaderboard!")
+        # This shows if get_standings() returned 0 rows
+        st.info("👋 Add players and finalize Round 1 to see the leaderboard!")
 
 with tab2:
     if not st.session_state.pairings:
@@ -312,6 +311,7 @@ with tab3:
             c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
             if c[2].button("Edit", key=f"edit_{idx}"):
                 edit_match_dialog(idx)
+
 
 
 
