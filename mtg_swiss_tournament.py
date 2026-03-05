@@ -183,7 +183,7 @@ with tab1:
 
     # 1. DIRECT CHECK: Has any match actually been completed?
     if not st.session_state.matches:
-        st.info("Add players in the sidebar. The leaderboard will be displayed after you submit Round 1 results.")
+        st.info("The leaderboard will be displayed here after you submit Round 1 results.")
     
     else:
         # 2. If matches exist, generate and show the table
@@ -354,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
