@@ -20,10 +20,13 @@ def confirm_results_dialog(results_to_save):
     st.write("Review scores below:")
     review_df = pd.DataFrame(results_to_save)[['p1', 'p1_w', 'p2_w', 'p2']]
     st.table(review_df)
-    if st.button("Confirm and Finalize", type="primary"):
+    col1, col2 = st.columns(2)
+    if col1.button("Confirm and Finalize", type="primary", use_container_width=True):
         st.session_state.matches.extend(results_to_save)
         st.session_state.pairings = [] 
         st.success("Results recorded!")
+        st.rerun()
+    if col2.button("Back to Editing", use_container_width=True):
         st.rerun()
 
 @st.dialog("Edit Match Result")
@@ -331,6 +334,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
