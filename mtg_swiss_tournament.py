@@ -200,6 +200,7 @@ with tab1:
 
 with tab2:
     if not st.session_state.pairings:
+        st.header("⚔️ Prepare for Battle")
         # Determine the correct button label
         label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
         
@@ -330,6 +331,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
