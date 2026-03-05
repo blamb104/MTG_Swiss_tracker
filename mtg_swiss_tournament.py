@@ -314,7 +314,7 @@ with tab2:
             })
             st.divider()
 
-        if st.button("✅ Submit Round Results", type="primary", use_container_width=True):
+        if st.button("✅ Submit Round Results"):
             confirm_results_dialog(current_results)
 
 with tab3:
@@ -354,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
