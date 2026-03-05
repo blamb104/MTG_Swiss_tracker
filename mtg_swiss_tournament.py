@@ -220,7 +220,7 @@ with tab2:
         num_players = len(st.session_state.players)
         
         if num_players < 6:
-            st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players})")
+            st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players}) **Add players in the sidebar.**")
             label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
             st.button(label, disabled=True)
         else:
@@ -354,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
