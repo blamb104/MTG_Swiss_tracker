@@ -212,7 +212,7 @@ with tab1:
 with tab2:
     if not st.session_state.pairings:
             st.header("⚔️ Prepare for Battle")
-        num_players = len(st.session_state.players)
+            num_players = len(st.session_state.players)
         if num_players<6:
             st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players})")
             label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
@@ -346,6 +346,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
