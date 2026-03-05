@@ -18,13 +18,14 @@ if 'pairings' not in st.session_state:
 @st.dialog("Finalize Round Results?")
 def confirm_results_dialog(results_to_save):
     st.write("Review scores below:")
-    review_df = pd.DataFrame(results_to_save)[['p1', 'p1_w', 'p2', 'p2_w']]
+    review_df = pd.DataFrame(results_to_save)[['p1', 'p1_w', 'p2', 'p2_w', 'd']]
     st.table(review_df)
+    
     col1, col2 = st.columns(2)
     if col1.button("Confirm and Finalize", type="primary", use_container_width=True):
         st.session_state.matches.extend(results_to_save)
         st.session_state.pairings = [] 
-        st.success("Results recorded!")
+        st.session_state.last_round_submitted = st.session_state.current_round
         st.rerun()
     if col2.button("Back to Editing", use_container_width=True):
         st.rerun()
@@ -211,50 +212,61 @@ with tab1:
 
 with tab2:
     if not st.session_state.pairings:
-            st.header("⚔️ Prepare for Battle")
-            num_players = len(st.session_state.players)
-        if num_players<6:
+        # --- NEW: SUCCESS MESSAGE FOR PREVIOUS ROUND ---
+        if 'last_round_submitted' in st.session_state and st.session_state.last_round_submitted > 0:
+            st.success(f"✅ Round {st.session_state.last_round_submitted} results recorded successfully!")
+
+        st.header("⚔️ Prepare for Battle")
+        num_players = len(st.session_state.players)
+        
+        if num_players < 6:
             st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players})")
             label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
             st.button(label, disabled=True)
         else:
             label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
-            if st.button(label):
-            # 1. Prepare candidates
+            
+            if st.button(label, type="primary"):
+                # Clear success message for the new round
+                st.session_state.last_round_submitted = 0 
+                
+                # 1. Prepare candidates
                 if st.session_state.current_round == 0:
                     candidates = st.session_state.players.copy()
                     random.shuffle(candidates) # True randomness for Round 1
                 else:
                     standings = get_standings()
                     candidates = standings['Player'].tolist()
-            
+                
                 new_pairings = []
-            
-            # 2. Handle BYE (Lowest ranked player who hasn't had one yet)
+                
+                # 2. Handle BYE (Lowest ranked player who hasn't had one yet)
                 if len(candidates) % 2 != 0:
                     for i in range(len(candidates)-1, -1, -1):
                         p = candidates[i]
-                        if not any(m['p2'] == "BYE" and m['p1'] == p for m in st.session_state.matches):
+                        # Check history for previous BYEs
+                        has_bye = any(m['p2'] == "BYE" and m['p1'] == p for m in st.session_state.matches)
+                        if not has_bye:
                             new_pairings.append({'p1': p, 'p2': 'BYE'})
                             candidates.remove(p)
                             break
 
-            # 3. Swiss Pairing Loop (Matching by record + preventing rematches)
+                # 3. Swiss Pairing Loop (Matching by record + preventing rematches)
                 while len(candidates) >= 2:
                     p1 = candidates.pop(0)
                     found = False
                     for i in range(len(candidates)):
                         p2 = candidates[i]
-                    # Check if they have played before
+                        # Check if they have played before
                         played_before = any((m['p1'] == p1 and m['p2'] == p2) or (m['p1'] == p2 and m['p2'] == p1) for m in st.session_state.matches)
-                    
+                        
                         if not played_before or st.session_state.current_round == 0:
                             new_pairings.append({'p1': p1, 'p2': p2})
                             candidates.pop(i)
                             found = True
                             break
-                
-                # Fallback: if everyone left has played p1, just pair with the next person
+                    
+                    # Fallback: if everyone left has played p1, just pair with the next person
                     if not found:
                         p2 = candidates.pop(0)
                         new_pairings.append({'p1': p1, 'p2': p2})
@@ -267,7 +279,6 @@ with tab2:
         # --- SCORE REPORTING UI ---
         st.subheader(f"⚔️ Round {st.session_state.current_round}")
         
-        # Widened the number columns slightly (from 1 to 1.2) to ensure buttons fit
         h_cols = st.columns([2.5, 2.5, 1.2, 1.2, 1.2])
         h_cols[0].markdown("**Player 1**")
         h_cols[1].markdown("**Player 2**")
@@ -280,18 +291,15 @@ with tab2:
         for i, pair in enumerate(st.session_state.pairings):
             cols = st.columns([2.5, 2.5, 1.2, 1.2, 1.2])
             
-            # Display Player Names
             cols[0].write(f"**{pair['p1']}**")
             cols[1].write(f"**{pair['p2']}**")
             
-            # Scoring Inputs with Buttons restored
             if pair['p2'] == "BYE":
                 p1_w, p2_w, draws = 2, 0, 0
                 cols[2].number_input("P1W", 2, 2, key=f"p1w{i}", disabled=True, label_visibility="collapsed")
                 cols[3].number_input("P2W", 0, 0, key=f"p2w{i}", disabled=True, label_visibility="collapsed")
                 cols[4].number_input("D", 0, 0, key=f"d{i}", disabled=True, label_visibility="collapsed")
             else:
-                # step=1 ensures the + and - buttons move by 1 game at a time
                 p1_w = cols[2].number_input("P1W", 0, 2, step=1, key=f"p1w{i}", label_visibility="collapsed")
                 p2_w = cols[3].number_input("P2W", 0, 2, step=1, key=f"p2w{i}", label_visibility="collapsed")
                 draws = cols[4].number_input("D", 0, 3, step=1, key=f"d{i}", label_visibility="collapsed")
@@ -306,7 +314,7 @@ with tab2:
             })
             st.divider()
 
-        if st.button("✅ Submit Round Results"):
+        if st.button("✅ Submit Round Results", type="primary", use_container_width=True):
             confirm_results_dialog(current_results)
 
 with tab3:
@@ -346,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
