@@ -226,7 +226,7 @@ with tab2:
         else:
             label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
             
-            if st.button(label, type="primary"):
+            if st.button(label):
                 # Clear success message for the new round
                 st.session_state.last_round_submitted = 0 
                 
@@ -354,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
