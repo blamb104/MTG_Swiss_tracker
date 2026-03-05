@@ -160,8 +160,6 @@ Points are awarded based on the outcome of each Best of 3 Match:
     else:
         st.success(f"🏆 Tournament in Progress (Round {st.session_state.current_round})")
 
-    st.divider()
-
     if st.session_state.players:
         st.write(f"**Total Players:** {len(st.session_state.players)}")
         with st.expander("View/Remove Players"):
@@ -354,6 +352,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
