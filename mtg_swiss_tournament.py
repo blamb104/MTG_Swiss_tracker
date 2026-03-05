@@ -211,57 +211,57 @@ with tab1:
 
 with tab2:
     if not st.session_state.pairings:
-        st.header("⚔️ Prepare for Battle")
-    num_players = len(st.session_state.players)
-    if num_players<6:
-        st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players})")
-        label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
-        st.button(label, disabled=True)
-    else:
-        label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
-        if st.button(label):
+            st.header("⚔️ Prepare for Battle")
+        num_players = len(st.session_state.players)
+        if num_players<6:
+            st.warning(f"⚠️ **Minimum 6 players required.** (Current: {num_players})")
+            label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
+            st.button(label, disabled=True)
+        else:
+            label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
+            if st.button(label):
             # 1. Prepare candidates
-            if st.session_state.current_round == 0:
-                candidates = st.session_state.players.copy()
-                random.shuffle(candidates) # True randomness for Round 1
-            else:
-                standings = get_standings()
-                candidates = standings['Player'].tolist()
+                if st.session_state.current_round == 0:
+                    candidates = st.session_state.players.copy()
+                    random.shuffle(candidates) # True randomness for Round 1
+                else:
+                    standings = get_standings()
+                    candidates = standings['Player'].tolist()
             
-            new_pairings = []
+                new_pairings = []
             
             # 2. Handle BYE (Lowest ranked player who hasn't had one yet)
-            if len(candidates) % 2 != 0:
-                for i in range(len(candidates)-1, -1, -1):
-                    p = candidates[i]
-                    if not any(m['p2'] == "BYE" and m['p1'] == p for m in st.session_state.matches):
-                        new_pairings.append({'p1': p, 'p2': 'BYE'})
-                        candidates.remove(p)
-                        break
+                if len(candidates) % 2 != 0:
+                    for i in range(len(candidates)-1, -1, -1):
+                        p = candidates[i]
+                        if not any(m['p2'] == "BYE" and m['p1'] == p for m in st.session_state.matches):
+                            new_pairings.append({'p1': p, 'p2': 'BYE'})
+                            candidates.remove(p)
+                            break
 
             # 3. Swiss Pairing Loop (Matching by record + preventing rematches)
-            while len(candidates) >= 2:
-                p1 = candidates.pop(0)
-                found = False
-                for i in range(len(candidates)):
-                    p2 = candidates[i]
+                while len(candidates) >= 2:
+                    p1 = candidates.pop(0)
+                    found = False
+                    for i in range(len(candidates)):
+                        p2 = candidates[i]
                     # Check if they have played before
-                    played_before = any((m['p1'] == p1 and m['p2'] == p2) or (m['p1'] == p2 and m['p2'] == p1) for m in st.session_state.matches)
+                        played_before = any((m['p1'] == p1 and m['p2'] == p2) or (m['p1'] == p2 and m['p2'] == p1) for m in st.session_state.matches)
                     
-                    if not played_before or st.session_state.current_round == 0:
-                        new_pairings.append({'p1': p1, 'p2': p2})
-                        candidates.pop(i)
-                        found = True
-                        break
+                        if not played_before or st.session_state.current_round == 0:
+                            new_pairings.append({'p1': p1, 'p2': p2})
+                            candidates.pop(i)
+                            found = True
+                            break
                 
                 # Fallback: if everyone left has played p1, just pair with the next person
-                if not found:
-                    p2 = candidates.pop(0)
-                    new_pairings.append({'p1': p1, 'p2': p2})
+                    if not found:
+                        p2 = candidates.pop(0)
+                        new_pairings.append({'p1': p1, 'p2': p2})
 
-            st.session_state.pairings = new_pairings
-            st.session_state.current_round += 1
-            st.rerun()
+                st.session_state.pairings = new_pairings
+                st.session_state.current_round += 1
+                st.rerun()
     
     else:
         # --- SCORE REPORTING UI ---
@@ -346,6 +346,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
