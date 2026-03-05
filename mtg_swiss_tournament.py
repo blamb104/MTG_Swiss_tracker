@@ -214,7 +214,7 @@ with tab2:
     if not st.session_state.pairings:
         # --- NEW: SUCCESS MESSAGE FOR PREVIOUS ROUND ---
         if 'last_round_submitted' in st.session_state and st.session_state.last_round_submitted > 0:
-            st.success(f"✅ Round {st.session_state.last_round_submitted} results recorded successfully!")
+            st.success(f"Round {st.session_state.last_round_submitted} results recorded successfully!")
 
         st.header("⚔️ Prepare for Battle")
         num_players = len(st.session_state.players)
@@ -354,6 +354,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
