@@ -18,7 +18,7 @@ if 'pairings' not in st.session_state:
 @st.dialog("Finalize Round Results?")
 def confirm_results_dialog(results_to_save):
     st.write("Review scores below:")
-    review_df = pd.DataFrame(results_to_save)[['p1', 'p1_w', 'p2_w', 'p2']]
+    review_df = pd.DataFrame(results_to_save)[['p1', 'p1_w', 'p2', 'p2_w']]
     st.table(review_df)
     col1, col2 = st.columns(2)
     if col1.button("Confirm and Finalize", type="primary", use_container_width=True):
@@ -334,6 +334,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
