@@ -146,7 +146,7 @@ with st.sidebar:
             autocomplete="new-password"
         )
     else:
-        st.info(f"Tournament in Progress: Round {st.session_state.current_round}")
+        st.success(f"🏆 Tournament in Progress (Round {st.session_state.current_round})")
 
     st.divider()
 
@@ -164,14 +164,14 @@ with st.sidebar:
 
 # --- MAIN UI ---
 st.title("🔮 MTG Swiss Tournament")
-tab1, tab2, tab3 = st.tabs(["🏆 Standings", "⚔️ Active Round", "📜 Match History"])
+tab1, tab2, tab3 = st.tabs(["🏆 Leaderboard", "⚔️ Active Round", "📜 Match History"])
 
 with tab1:
     st.header("🏆 Leaderboard")
 
     # 1. DIRECT CHECK: Has any match actually been completed?
     if not st.session_state.matches:
-        st.info("Add players in the sidebar. The leaderboard will be displayed after you finalize Round 1.")
+        st.info("Add players in the sidebar. The leaderboard will be displayed after you submit Round 1 results.")
     
     else:
         # 2. If matches exist, generate and show the table
@@ -201,7 +201,7 @@ with tab1:
 with tab2:
     if not st.session_state.pairings:
         # Determine the correct button label
-        label = "Start Tournament" if st.session_state.current_round == 0 else f"Generate Round {st.session_state.current_round + 1}"
+        label = "Start Tournament" if st.session_state.current_round == 0 else f"➡️ Generate Round {st.session_state.current_round + 1}"
         
         if st.button(label):
             # 1. Prepare candidates
@@ -249,9 +249,9 @@ with tab2:
     
     else:
         # --- SCORE REPORTING UI ---
-        st.subheader(f"Round {st.session_state.current_round} Score Reporting")
+        st.subheader(f"⚔️ Round {st.session_state.current_round}")
         
-        # We widened the number columns slightly (from 1 to 1.2) to ensure buttons fit
+        # Widened the number columns slightly (from 1 to 1.2) to ensure buttons fit
         h_cols = st.columns([2.5, 2.5, 1.2, 1.2, 1.2])
         h_cols[0].markdown("**Player 1**")
         h_cols[1].markdown("**Player 2**")
@@ -290,11 +290,11 @@ with tab2:
             })
             st.divider()
 
-        if st.button("Finalize Round Results", type="primary"):
+        if st.button("✅ Submit Round Results", type="primary"):
             confirm_results_dialog(current_results)
 
 with tab3:
-    st.header("📜 History")
+    st.header("📜 Match History")
     
     if not st.session_state.matches:
         st.info("No matches played yet. Results will appear here once submitted.")
@@ -330,6 +330,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
