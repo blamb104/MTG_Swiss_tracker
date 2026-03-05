@@ -130,16 +130,17 @@ with st.sidebar:
         st.markdown("""
 1. Match Pairing
 - Round 1 pairings are completely random.
-- Round 2+: pairnigs are based on players' Points.
+- Round 2+ pairnigs are based on players' Points.
 - The system will prioritize pairing each player with someone they have not played yet, preventing rematches.
 - If there are an odd number of players, the player with the lowest standing who hasn't had a "Bye" yet receives an automatic win (2-0 score), but that player's Game Win Percentage (GWP) stays the same.
 
 2. Scoring System
 
 Points are awarded based on the outcome of each Best of 3 Match:
-    - Match Win: 3 Points
-    - Match Draw: 1 Point
-    - Match Loss: 0 Points
+
+- Match Win: 3 Points
+- Match Draw: 1 Point
+- Match Loss: 0 Points
 
 3. Tiebreakers
 - If two players have the same number of points, the winner is determined by Opponent Match Win Percentage (OMWP).
@@ -341,6 +342,7 @@ with tab3:
             mime='text/csv',
             use_container_width=True
         )
+
 
 
 
