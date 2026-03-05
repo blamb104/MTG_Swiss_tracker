@@ -123,9 +123,21 @@ def add_player_callback():
 # --- SIDEBAR ---
 with st.sidebar:
     st.title("Tournament Setup")
+    with st.expander("Scoring Rules"):
+        st.markdown("""
+        Players will participate in Bo3
+        matches, with the winner of each
+        match receiving 3 Match Points.
+        Players will be ranked according
+        to their total number of points
+        across the tournament, with ties
+        being broken based first on 
+        Opponent Match Win Percentage
+        and then on Game Win Percentage.
+        """)
+    st.divider()
+    st.subheader("Registration")
     if st.session_state.current_round == 0:
-        st.subheader("Registration")
-        # Adding 'on_change' and 'key' makes hitting Enter work instantly
         st.text_input(
             "Enter Player Name:", 
             key="player_input", 
@@ -133,33 +145,26 @@ with st.sidebar:
             placeholder="Type name and hit Enter...",
             autocomplete="new-password"
         )
-        
-        st.write(f"**Total Players:** {len(st.session_state.players)}")
-        if st.session_state.players:
-            with st.expander("View/Remove Players"):
-                for p in st.session_state.players:
-                    cols = st.columns([4, 1])
-                    cols[0].write(p)
-                    if cols[1].button("❌", key=f"del_{p}"):
-                        st.session_state.players.remove(p)
-                        st.rerun()
     else:
         st.info(f"Tournament in Progress: Round {st.session_state.current_round}")
 
-        st.divider()
+    st.divider()
+
+    if st.session_state.players:
         st.write(f"**Total Players:** {len(st.session_state.players)}")
-        if st.session_state.players:
-            with st.expander("View/Remove Players"):
-                for p in st.session_state.players:
-                    cols = st.columns([4, 1])
-                    cols[0].write(p)
-                    if cols[1].button("❌", key=f"del_{p}"):
-                        st.session_state.players.remove(p)
-                        st.rerun()
+        with st.expander("View/Remove Players"):
+            for p in st.session_state.players:
+                cols = st.columns([4, 1])
+                cols[0].write(p)
+                if cols[1].button("❌", key=f"del_{p}"):
+                    st.session_state.players.remove(p)
+                    st.rerun()
+    else:
+            st.info("Waiting for players...")
 
 # --- MAIN UI ---
 st.title("🔮 MTG Swiss Tournament")
-tab1, tab2, tab3 = st.tabs(["📊 Standings", "⚔️ Active Round", "📖 Match History"])
+tab1, tab2, tab3 = st.tabs(["🏆 Standings", "⚔️ Active Round", "📜 Match History"])
 
 with tab1:
     st.header("🏆 Leaderboard")
@@ -289,34 +294,43 @@ with tab2:
             confirm_results_dialog(current_results)
 
 with tab3:
-    st.subheader("Match History")
+    st.header("📜 History")
+    
     if not st.session_state.matches:
-        st.write("No matches played yet.")
+        st.info("No matches played yet. Results will appear here once submitted.")
     else:
-        # --- NEW: EXPORT HISTORY TO CSV ---
+        # 1. GROUPED BY ROUND EXPANDERS (Top Section)
+        # Get unique rounds and sort them (Newest round first)
+        all_rounds = sorted(list(set(m['round'] for m in st.session_state.matches)))
+
+        for rd in all_rounds:
+            # We keep the most recent round expanded by default for convenience
+            with st.expander(f"Round {rd}", expanded=(rd == max(all_rounds))):
+                # Filter matches belonging to this specific round
+                round_matches = [(i, m) for i, m in enumerate(st.session_state.matches) if m['round'] == rd]
+                
+                for idx, match in round_matches:
+                    cols = st.columns([5, 1]) 
+                    cols[0].write(f"**{match['p1']}** ({match['p1_w']}) vs **{match['p2']}** ({match['p2_w']}) — Draws: {match['d']}")
+                    
+                    if cols[1].button("Edit", key=f"edit_{idx}", use_container_width=True):
+                        edit_match_dialog(idx)
+
+        # 2. EXPORT SECTION (Bottom Section)
+        st.divider() 
+        # Prepare the DataFrame
         history_df = pd.DataFrame(st.session_state.matches)
-        
-        # Reordering columns for better readability in the CSV
         history_df = history_df[['round', 'p1', 'p1_w', 'p2_w', 'p2', 'd']]
-        
         csv_history = history_df.to_csv(index=False).encode('utf-8')
         
         st.download_button(
-            label="📥 Export Match History to CSV",
+            label="📥 Download Match History (CSV)",
             data=csv_history,
-            file_name=f"Tournament_History_Rd{st.session_state.current_round}.csv",
+            file_name=f"Swiss_Tournament_History.csv",
             mime='text/csv',
+            use_container_width=True
         )
-        
-        st.divider()
-        # --- END EXPORT SECTION ---
 
-        for idx, match in enumerate(st.session_state.matches):
-            c = st.columns([1, 4, 1])
-            c[0].write(f"**Rd {match['round']}**")
-            c[1].write(f"{match['p1']} ({match['p1_w']}) vs {match['p2']} ({match['p2_w']}) - Draws: {match['d']}")
-            if c[2].button("Edit", key=f"edit_{idx}"):
-                edit_match_dialog(idx)
 
 
 
